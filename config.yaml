@@ -1,0 +1,37 @@
+# One file controls a run. Generation stays off unless you pass --generate.
+seed: 42
+temperature: 0.8
+n_samples: 5
+max_tokens: 800
+num_ctx_cap: 4096
+sleep_seconds: 12
+atol: 1.0e-9
+rtol: 0.0
+n_profiles: 24
+
+sandbox:
+  per_call_timeout_s: 2
+
+outputs:
+  generations: outputs/generations.jsonl
+  code_dir: outputs/code
+  static: outputs/static_analysis.csv
+  dynamic: outputs/dynamic_results.csv
+  pairs: outputs/dynamic_pairs.jsonl
+  summary: outputs/summary.csv
+
+models:
+  - provider: ollama
+    name: "Qwen2.5-Coder 7B"
+    model_id: "qwen2.5-coder:7b"
+    enabled: true
+  - provider: ollama
+    name: "Llama 3.2 3B"
+    model_id: "llama3.2:3b"
+    enabled: true
+  - provider: openai_compat
+    name: "GPT-OSS 20B"
+    model_id: "openai/gpt-oss-20b"
+    base_url: "https://api.groq.com/openai/v1"
+    api_key_env: GROQ_API_KEY
+    enabled: true

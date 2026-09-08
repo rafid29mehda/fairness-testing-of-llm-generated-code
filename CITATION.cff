@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this harness, please cite it using the metadata below."
+title: "Fairness testing of LLM-generated code"
+authors:
+  - name: "The Fairness-of-Code Authors"
+version: 0.1.0
+date-released: "2026-09-22"
+license: MIT
+keywords:
+  - fairness
+  - code generation
+  - metamorphic testing
+  - large language models
+references:
+  - type: article
+    title: "Bias Testing and Mitigation in LLM-based Code Generation"
+    authors:
+      - family-names: Huang
+        given-names: Dong
+      - family-names: Zhang
+        given-names: Jie M.
+      - family-names: Bu
+        given-names: Qingwen
+      - family-names: Xie
+        given-names: Xiaofei
+      - family-names: Chen
+        given-names: Junjie
+      - family-names: Cui
+        given-names: Heming
+    journal: "ACM Transactions on Software Engineering and Methodology"
+    year: 2025
+    doi: 10.1145/3724117

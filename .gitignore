@@ -1,0 +1,15 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+.DS_Store
+outputs/*.jsonl
+outputs/code/
+outputs/figures/
+outputs/e2e/
+.superpowers/
+docs/superpowers/
