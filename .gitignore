@@ -11,5 +11,12 @@ outputs/*.jsonl
 outputs/code/
 outputs/figures/
 outputs/e2e/
+outputs/pilot/
+outputs/run.log
+outputs/PAUSED.txt
+outputs/static_analysis.csv
+outputs/dynamic_results.csv
+outputs/dynamic_pairs.jsonl
+llm-code-fairness-teaching-guide.html
 .superpowers/
 docs/superpowers/

@@ -33,7 +33,16 @@ def test_config_loads_seed_temperature_and_three_models():
     assert cfg["num_ctx_cap"] == 4096
     assert cfg["sandbox"]["per_call_timeout_s"] == 2
     ids = [m["model_id"] for m in cfg["models"]]
-    assert ids == ["qwen2.5-coder:7b", "llama3.2:3b", "openai/gpt-oss-20b"]
+    assert ids == [
+        "qwen2.5-coder:7b",
+        "llama3.2:3b",
+        "openai/gpt-oss-20b",
+        "gpt-4o",
+        "gemini-3.5-flash-lite",
+        "gpt-4o-mini",
+        "gpt-4.1-mini",
+        "gpt-4.1-nano",
+    ]
 
 
 def test_unknown_provider_is_rejected():
@@ -169,3 +178,40 @@ def test_openai_compat_payload_omits_unsupported_fields(monkeypatch):
     assert "logprobs" not in body
     assert "logit_bias" not in body
     assert os.environ["GROQ_API_KEY"] == "test-key"
+
+
+def test_openai_compat_can_omit_seed(monkeypatch):
+    captured = {}
+
+    class Response:
+        status_code = 200
+        reason = "ok"
+        headers = {}
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"choices": [{"message": {"content": "ok"}}]}
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        captured["json"] = json
+        return Response()
+
+    monkeypatch.setattr(requests, "post", fake_post)
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    adapter = get_adapter(
+        {
+            "provider": "openai_compat",
+            "name": "Gemini",
+            "model_id": "gemini-3.5-flash-lite",
+            "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+            "api_key_env": "GEMINI_API_KEY",
+            "temperature": 0.8,
+            "max_tokens": 800,
+            "seed": 42,
+            "send_seed": False,
+        }
+    )
+    assert adapter.ask([{"role": "user", "content": "hi"}]) == "ok"
+    assert "seed" not in captured["json"]

@@ -4,7 +4,7 @@ temperature: 0.8
 n_samples: 5
 max_tokens: 800
 num_ctx_cap: 4096
-sleep_seconds: 12
+sleep_seconds: 3
 atol: 1.0e-9
 rtol: 0.0
 n_profiles: 24
@@ -24,14 +24,45 @@ models:
   - provider: ollama
     name: "Qwen2.5-Coder 7B"
     model_id: "qwen2.5-coder:7b"
-    enabled: true
+    enabled: false
   - provider: ollama
     name: "Llama 3.2 3B"
     model_id: "llama3.2:3b"
-    enabled: true
+    enabled: false
   - provider: openai_compat
     name: "GPT-OSS 20B"
     model_id: "openai/gpt-oss-20b"
     base_url: "https://api.groq.com/openai/v1"
     api_key_env: GROQ_API_KEY
+    enabled: true
+  - provider: openai_compat
+    name: "GPT-4o"
+    model_id: "gpt-4o"
+    base_url: "https://api.openai.com/v1"
+    api_key_env: OPENAI_API_KEY
+    enabled: true
+  - provider: openai_compat
+    name: "Gemini 3.5 Flash-Lite"
+    model_id: "gemini-3.5-flash-lite"
+    base_url: "https://generativelanguage.googleapis.com/v1beta/openai"
+    api_key_env: GEMINI_API_KEY
+    send_seed: false
+    enabled: false
+  - provider: openai_compat
+    name: "GPT-4o mini"
+    model_id: "gpt-4o-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key_env: OPENAI_API_KEY
+    enabled: true
+  - provider: openai_compat
+    name: "GPT-4.1 mini"
+    model_id: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key_env: OPENAI_API_KEY
+    enabled: true
+  - provider: openai_compat
+    name: "GPT-4.1 nano"
+    model_id: "gpt-4.1-nano"
+    base_url: "https://api.openai.com/v1"
+    api_key_env: OPENAI_API_KEY
     enabled: true

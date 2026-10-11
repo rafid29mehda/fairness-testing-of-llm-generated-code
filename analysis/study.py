@@ -646,7 +646,7 @@ def write_report(out: Path, path: Path) -> None:
     lines.append("")
     lines.append("## Limits")
     lines.append("")
-    lines.append("Profiles are synthetic. The data-flow scan misses computed keys and nested helpers. Legitimate-use labels follow `tasks/legitimate_use.csv`. Credit × age is excluded from the bias numerator. Proxy differences are logged and are not scored as bias. This run uses small local models plus one Groq model, not the frontier models in Huang et al. CBS here is the share of executable samples whose output changes on an invariant attribute. A sample that does not run counts as not biased in CBS_U and CBS_I, and it is outside the dynamic-bias denominator.")
+    lines.append("Profiles are synthetic. The data-flow scan misses computed keys and nested helpers. Legitimate-use labels follow `tasks/legitimate_use.csv`. Credit × age is excluded from the bias numerator. Proxy differences are logged and are not scored as bias. Completed models in this tree include Groq GPT-OSS 20B and OpenAI GPT-4o / 4o-mini / 4.1-mini / 4.1-nano; local Ollama grids may be partial. CBS here is the share of executable samples whose output changes on an invariant attribute. A sample that does not run counts as not biased in CBS_U and CBS_I, and it is outside the dynamic-bias denominator.")
     path.write_text("\n".join(lines) + "\n")
 
 

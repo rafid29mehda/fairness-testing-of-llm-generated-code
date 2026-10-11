@@ -132,6 +132,7 @@ def get_adapter(cfg: Dict) -> ModelAdapter:
             base_url=cfg["base_url"],
             api_key=os.environ.get(api_key_env, ""),
             max_retries=cfg.get("max_retries", 5),
+            send_seed=cfg.get("send_seed", True),
             **common,
         )
     raise ValueError(f"Unknown provider: {provider!r}. Use 'ollama' or 'openai_compat'.")

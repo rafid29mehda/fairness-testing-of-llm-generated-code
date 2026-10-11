@@ -14,6 +14,7 @@ class OpenAICompatAdapter(ModelAdapter):
         api_key: str,
         timeout: int = 120,
         max_retries: int = 5,
+        send_seed: bool = True,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -21,6 +22,7 @@ class OpenAICompatAdapter(ModelAdapter):
         self.api_key = api_key
         self.timeout = timeout
         self.max_retries = max_retries
+        self.send_seed = send_seed
 
     def ask(self, messages: List[Dict[str, str]]) -> str:
         text, _meta = self.ask_with_meta(messages)
@@ -29,13 +31,14 @@ class OpenAICompatAdapter(ModelAdapter):
     def ask_with_meta(self, messages: List[Dict[str, str]]):
         # Groq rejects logprobs, logit_bias, top_logprobs, and n other than 1.
         # Temperature 0 is rewritten by Groq to 1e-8, so callers should send 0.8.
+        # Gemini's OpenAI-compat endpoint rejects seed.
         payload = {
             "model": self.model_id,
             "messages": messages,
             "temperature": self.temperature,
             "max_tokens": self.max_tokens,
         }
-        if self.seed is not None:
+        if self.send_seed and self.seed is not None:
             payload["seed"] = self.seed
         resp = post_with_retries(
             f"{self.base_url}/chat/completions",

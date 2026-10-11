@@ -36,6 +36,9 @@ Generated JSONL, extracted code, and figures are gitignored. CI runs `pytest` on
 - `analysis/` — extraction, AST scan, counterfactual grid, subprocess sandbox, rates
 - `models/` — Ollama, and an OpenAI-compatible client pointed at Groq
 - `docs/design.md` — what is counted, and what is left out
+- `docs/onboarding.md` — concepts, terms, and a walkthrough for someone new to the repo
+- `RESULTS.md` — portfolio summary of completed runs and what remains
+- `REPORT.md` — auto-written rates, mitigation contrasts, and Wilson intervals from `outputs/`
 
 ## Limits
 
