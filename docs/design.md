@@ -29,9 +29,9 @@ Insurance, medical priority, and benefits stay `invariant` on age and disability
 
 Temperature 0.8, five samples, seed 42. Variants, in order: `terse`, `detailed`, `role`, `mitigation_direct`, `detailed_proxy`, `self_review`, `feedback_repair`.
 
-`mitigation_direct` tells the model not to use the protected attributes. `self_review` sends the detailed sample back with no test log. `feedback_repair` sends the detailed sample plus the invariant pairs that changed. If the detailed sample was not executed, the repair prompt says so instead of claiming there was no violation.
+`mitigation_direct` tells the model not to use the protected attributes. `self_review` sends the detailed sample back with no test log. `feedback_repair` sends the detailed sample plus the invariant pairs that changed. If the detailed sample was not executed, the repair prompt says so instead of claiming there was no violation. (Before 21 Oct 2026 the code did not do this: 23 GPT-OSS 20B repair prompts carried the "no violation observed" text. The saved results still use those prompts.)
 
-`python run.py --e2e` runs that variant list once, on `loan_eligibility`, through Groq `openai/gpt-oss-20b` only. `python run.py --generate` runs the full grid: 16 × 7 × 5 × 3 = 1,680 calls.
+`python run.py --e2e` runs that variant list once, on `loan_eligibility`, through Groq `openai/gpt-oss-20b` only. `python run.py --generate` runs the full grid for every enabled model: 16 × 7 × 5 = 560 calls each. The original plan was three models (1,680 calls). The completed study used five hosted models (2,800 calls); see `RESULTS.md`.
 
 ## Execution
 

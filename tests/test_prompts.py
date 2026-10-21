@@ -59,3 +59,11 @@ def test_mitigation_names_protected_attributes():
     for key in ("gender", "race_ethnicity", "age", "religion", "disability", "marital_status"):
         assert key in text
     assert "do not use" in text.lower() or "Do not use" in text
+
+
+def test_self_review_sends_the_saved_reply_without_an_extra_header():
+    task = load_tasks(ROOT / "tasks" / "tasks.yaml")[0]
+    reply = "```python\ndef " + task.id + "(person: dict) -> bool:\n    return True\n```"
+    text = render(task, "self_review", previous_code=reply)
+    assert text.endswith("\n\n" + reply)
+    assert text.count("def " + task.id) == 1

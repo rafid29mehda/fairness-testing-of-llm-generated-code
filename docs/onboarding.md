@@ -278,22 +278,24 @@ Say the denominator when you quote any of these. "6/13 of executable samples" an
 | n_samples | 5 | Draws per task per variant in the full study |
 | max_tokens | 800 | Cap on the completion |
 | num_ctx_cap | 4096 | Local context window cap. Leave it capped. An uncapped window on a small machine can reserve a very large cache before the first token. |
-| sleep_seconds | 12 | Pause between calls |
+| sleep_seconds | 3 | Pause after each fresh remote call (it was 12 for the early proof runs) |
 | n_profiles | 24 | People in the grid |
 | per_call_timeout_s | 2 | Sandbox timeout for one call |
 | atol | 1e-9 | Floats closer than this count as equal |
 
-Models, in run order (local Llama, then local Qwen, then Groq):
+`config.yaml` lists eight models. Local models run first (Llama, then Qwen), then hosted ones. Only the five hosted models marked `enabled: true` were run to completion:
 
 | Name | How it is called | Id |
 | --- | --- | --- |
 | Llama 3.2 3B | Ollama on this machine | `llama3.2:3b` |
 | Qwen2.5-Coder 7B | Ollama on this machine | `qwen2.5-coder:7b` |
 | GPT-OSS 20B | Groq, OpenAI-compatible API | `openai/gpt-oss-20b` |
+| GPT-4o, GPT-4o mini, GPT-4.1 mini, GPT-4.1 nano | OpenAI API | `gpt-4o`, `gpt-4o-mini`, `gpt-4.1-mini`, `gpt-4.1-nano` |
+| Gemini 3.5 Flash-Lite | Google, OpenAI-compatible API | `gemini-3.5-flash-lite` (disabled; stopped at the free-tier daily cap) |
 
 Load one local model at a time. Do not run the 20B model as a local weight. The Groq key lives in `.env` as `GROQ_API_KEY`. `.env.example` shows the name with an empty value. `.env` is gitignored. Do not print the key, and do not commit it.
 
-Call budget for `python run.py --generate`:
+Call budget for `python run.py --generate`, shown for the original three-model plan (multiply 560 by the number of enabled models; five hosted models make 2,800):
 
 | Block | Calls |
 | --- | --- |
@@ -309,10 +311,10 @@ Commands:
 
 | Command | Calls a model? | What you get |
 | --- | --- | --- |
-| `python run.py` | No | Prints task count, label count, how many rows may legitimately differ, model count, and `generation=off`. Expect `tasks=16`, `labels=96`, `may_legitimately_differ=4`. |
+| `python run.py` | No | Prints task count, label count, how many rows may legitimately differ, model count (all listed, then enabled), and `generation=off`. Expect `tasks=16`, `labels=96`, `may_legitimately_differ=4`. |
 | `python run.py --pilot` | One local call | `loan_eligibility`, variant `detailed`, one sample, model `llama3.2:latest` unless you pass `--pilot-model`. |
 | `python run.py --e2e` | Seven Groq calls | `loan_eligibility` only, one sample, all seven variants, in the order in section 8. Writes `outputs/e2e/`. Does not start Ollama. Does not read or write the full-study JSONL files. |
-| `python run.py --generate` | Up to 1680 | The full grid. Resumes from `outputs/generations.jsonl`. |
+| `python run.py --generate` | Up to 560 per enabled model | The full grid. Resumes from `outputs/generations.jsonl`. |
 | `pytest` | No | Offline tests. CI runs this and nothing else. |
 
 `--e2e` and `--generate` together exit 2 and start neither. If `outputs/e2e/manifest.json` already exists, `--e2e` exits 0 and makes no new calls. Delete that folder when you want a fresh seven-call run.
@@ -336,7 +338,7 @@ analysis/dynamic.py           compare outputs, apply labels, sanity
 analysis/sandbox.py           parent side of the child process
 analysis/sandbox_child.py     the only file that executes generated code
 analysis/metrics.py           CBS, Wilson, bootstrap, sign-flip, Holm
-analysis/study.py             the 1680-call loop, tables, report, figures
+analysis/study.py             the full-grid loop (560 calls per model), tables, report, figures
 analysis/e2e.py               the seven-call Groq loop
 run.py                        the command line
 config.yaml                   knobs
@@ -414,7 +416,7 @@ Editing a generated function by hand so the table looks better. Raw outputs stay
 
 Moving a label in `legitimate_use.csv` after generation and describing the new score as the original experiment. Re-score, and say the label changed.
 
-Starting `--generate` on a laptop to "finish the study." It is 1680 calls, it loads local models one at a time, and it is a different activity from reading this guide or from the seven-call Groq run.
+Starting `--generate` on a laptop to "finish the study." It is 560 calls per enabled model, it loads local models one at a time, and it is a different activity from reading this guide or from the seven-call Groq run.
 
 Comparing a rate in this repo to a percentage in Huang et al. as if the setups matched. Different models, a fixed signature, 16 tasks instead of their prompt pool, no human labeling pass, and a legitimate-use split. You can compare the definition and the direction of a mitigation. You cannot say the numbers replicate theirs.
 

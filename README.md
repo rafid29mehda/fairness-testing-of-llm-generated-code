@@ -25,7 +25,7 @@ Copy `.env.example` to `.env` for the Groq model. Local models use Ollama, one l
 | --- | --- |
 | `python run.py --pilot` | One local sample of `loan_eligibility`. |
 | `python run.py --e2e` | Seven Groq calls: every prompt variant, one sample, `loan_eligibility` only. Writes `outputs/e2e/`. Does not start Ollama. |
-| `python run.py --generate` | Full grid. 16 tasks, 3 models, 5 samples, 7 variants: 1,680 calls. Resumes from `outputs/generations.jsonl`. |
+| `python run.py --generate` | Full grid: 560 calls per enabled model (16 tasks, 5 samples, 7 variants). The five hosted models enabled in `config.yaml` make 2,800 calls. Resumes from `outputs/generations.jsonl`. |
 
 Generated JSONL, extracted code, and figures are gitignored. CI runs `pytest` only.
 

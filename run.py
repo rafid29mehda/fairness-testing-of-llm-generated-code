@@ -37,6 +37,7 @@ def check(cfg: dict) -> str:
         f"labels={len(labels)}",
         f"may_legitimately_differ={cautious}",
         f"models={len(cfg['models'])}",
+        f"models_enabled={sum(1 for model in cfg['models'] if model.get('enabled', True))}",
         f"temperature={cfg['temperature']}",
         f"n_samples={cfg['n_samples']}",
         f"num_ctx_cap={cfg['num_ctx_cap']}",

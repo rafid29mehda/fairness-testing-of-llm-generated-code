@@ -181,7 +181,10 @@ def test_run_e2e_writes_seven_records_and_does_not_open_the_study_log(tmp_path: 
     proof = tmp_path / "outputs" / "e2e"
     assert code == 0
     assert adapter.calls == 7
-    assert slept == [12, 12, 12, 12, 12, 12]
+    # The patch replaces the global time.sleep, so the stdlib's subprocess wait loop
+    # (sub-second delays, used by the sandbox) is recorded too. Count only the pauses
+    # the runner itself makes.
+    assert [seconds for seconds in slept if seconds >= 1] == [12, 12, 12, 12, 12, 12]
     assert sum(1 for line in (proof / "generations.jsonl").read_text().splitlines() if line.strip()) == 7
     assert sum(1 for line in (proof / "analysis.jsonl").read_text().splitlines() if line.strip()) == 7
     assert (proof / "manifest.json").exists()

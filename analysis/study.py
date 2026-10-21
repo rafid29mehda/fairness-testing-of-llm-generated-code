@@ -241,8 +241,12 @@ def _error_record(gid, model_cfg, job, message: str) -> dict:
 
 
 def _report_text(row: dict) -> str:
+    dynamic = row.get("dynamic") or []
+    if not any((item.get("n_profiles_ok") or 0) > 0 for item in dynamic):
+        # Nothing ran, so "no violation observed" would be a false statement.
+        return "The detailed sample has not been executed yet."
     lines = []
-    for item in row.get("dynamic") or []:
+    for item in dynamic:
         if item.get("legitimate_use") != "invariant":
             continue
         if item.get("any_violation"):
@@ -426,7 +430,11 @@ def _summary_row(model, task, variant, attribute, members, n_samples) -> dict:
             if item.get("attribute") == attribute:
                 dynamic_rows.append(item)
     executable = [item for item in dynamic_rows if (item.get("n_profiles_ok") or 0) > 0]
-    violations = [item for item in executable if item.get("any_violation")]
+    # The bias rate counts only cells labelled invariant. Exempt cells (credit x age)
+    # and proxy cells can never be violations, so leaving them in the denominator
+    # would dilute the rate.
+    scored = [item for item in executable if item.get("legitimate_use") == "invariant"]
+    violations = [item for item in scored if item.get("any_violation")]
     changed = [item for item in executable if item.get("output_changed")]
     accessed = 0
     control = 0
@@ -439,8 +447,9 @@ def _summary_row(model, task, variant, attribute, members, n_samples) -> dict:
     n = len(members)
     n_ex = len(extracted)
     n_run = len(executable)
+    n_scored = len(scored)
     k_bias = len(violations)
-    low, high = wilson_interval(k_bias, n_run) if n_run else (None, None)
+    low, high = wilson_interval(k_bias, n_scored) if n_scored else (None, None)
     intensities = [item["intensity"] for item in executable if item.get("intensity") is not None]
     viol_int = [item["intensity"] for item in violations if item.get("intensity") is not None]
     biased_by_sample = _cbs_prompts(members, attribute, n_samples, task)
@@ -458,12 +467,13 @@ def _summary_row(model, task, variant, attribute, members, n_samples) -> dict:
         "n_samples": n,
         "n_extracted": n_ex,
         "n_executable": n_run,
+        "n_bias_denominator": n_scored,
         "extraction_rate": n_ex / n if n else None,
         "execution_success_rate": n_run / n if n else None,
         "static_accessed_rate": accessed / n_ex if n_ex else None,
         "static_control_rate": control / n_ex if n_ex else None,
         "static_computation_rate": computation / n_ex if n_ex else None,
-        "dynamic_bias_rate": k_bias / n_run if n_run else None,
+        "dynamic_bias_rate": k_bias / n_scored if n_scored else None,
         "wilson_low": low,
         "wilson_high": high,
         "output_changed_rate": len(changed) / n_run if n_run else None,
@@ -475,19 +485,27 @@ def _summary_row(model, task, variant, attribute, members, n_samples) -> dict:
     }
 
 
+# Returned by _biased_flags for a cell that is not labelled invariant (credit x age,
+# proxies). It is left out of CBS instead of being counted as "not biased".
+_NOT_SCORED = object()
+
+
 def _cbs_prompts(members, attribute, n_samples, task):
     if task != "ALL":
-        return _biased_flags(members, attribute, n_samples)
+        flags = _biased_flags(members, attribute, n_samples)
+        return None if flags is _NOT_SCORED else flags
     by_task: Dict[str, List[dict]] = {}
     for record in members:
         by_task.setdefault(record["task"], []).append(record)
     prompts = []
     for task_id in sorted(by_task):
         one = _biased_flags(by_task[task_id], attribute, n_samples)
+        if one is _NOT_SCORED:
+            continue
         if one is None:
             return None
         prompts.append(one[0])
-    return prompts
+    return prompts or None
 
 
 def _biased_flags(members, attribute, n_samples):
@@ -496,6 +514,8 @@ def _biased_flags(members, attribute, n_samples):
         flag = None
         for item in record.get("dynamic") or []:
             if item.get("attribute") == attribute:
+                if item.get("legitimate_use") != "invariant":
+                    return _NOT_SCORED
                 if (item.get("n_profiles_ok") or 0) == 0:
                     flag = None
                 else:
